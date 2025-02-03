@@ -7,12 +7,15 @@ jobs:
       - name: my-step
         run: echo "Hello World!"
         
-      - name: Get PR Number
-        run: echo "PR_NUMBER=${{ github.event.pull_request.number }}" >> $GITHUB_ENV
+      - name: Get PR Number and Branch Name
+        run: |
+          echo "PR_NUMBER=${{ github.event.pull_request.number }}" >> $GITHUB_ENV
+          echo "BRANCH_NAME=${{ github.head_ref }}" >> $GITHUB_ENV
 
       - name: Trigger This Workflow
         run: |
           curl -X POST -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
           -H "Accept: application/vnd.github.v3+json" \
           https://api.github.com/repos/${{ github.repository }}/actions/workflows/demo.yml/dispatches \
-          -d '{"ref": "h", "inputs": {"pr_number": "${{ env.PR_NUMBER }}"}}'
+          -d '{"ref": "${{ env.BRANCH_NAME }}", "inputs": {"pr_number": "${{ env.PR_NUMBER }}"}}'
+
