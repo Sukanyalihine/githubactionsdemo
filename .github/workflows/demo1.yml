@@ -1,20 +1,44 @@
-name: hello-world
-on: push
+name: Hello World Workflow
+on:
+  pull_request:  # Triggers on every PR (opened, updated, reopened) testing
+    types: [opened, synchronize, reopened]
+
 jobs:
-  my-job:
+  hello-world:
     runs-on: ubuntu-latest
+
     steps:
-      - name: my-step
-        run: echo "Hello World!"
-        
+      - name: Print Hello World
+        run: echo "Hello, World!"
+
       - name: Get PR Number and Branch Name
         run: |
           echo "PR_NUMBER=${{ github.event.pull_request.number }}" >> $GITHUB_ENV
           echo "BRANCH_NAME=${{ github.event.pull_request.head.ref }}" >> $GITHUB_ENV
 
-      - name: Trigger This Workflow
+      - name: Show Extracted Details
         run: |
-          curl -X POST -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
-          -H "Accept: application/vnd.github.v3+json" \
-          https://api.github.com/repos/${{ github.repository }}/actions/workflows/demo.yml/dispatches \
-          -d '{"ref": "${{ env.BRANCH_NAME }}", "inputs": {"pr_number": "${{ env.PR_NUMBER }}"}}'
+          echo "Pull Request Number: $PR_NUMBER"
+          echo "Source Branch Name: $BRANCH_NAME"
+        
+      # Trigger CodeQL analysis (if not already part of your workflow)
+      - name: Trigger CodeQL Scan
+        uses: github/codeql-action/init@v2
+        with:
+          languages: 'python'  # Change as per the language you are using, e.g., 'javascript', 'go'
+      - name: Run CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+
+      # Make an API Call to fetch the CodeQL report and save it to JSON
+      - name: Fetch CodeQL Report and Save as JSON
+        run: |
+          # Fetch the CodeQL results in JSON format
+          curl -X GET "https://api.github.com/repos/${{ github.repository }}/pulls/${{ env.PR_NUMBER }}/check-runs" \
+          -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
+          -H "Accept: application/vnd.github.v3+json" > codeql_report.json
+
+          # Check if the file is saved
+          ls -lh codeql_report.json
+
+          # Optionally, upload it as an artifact or store it in another location
+          echo "CodeQL Report saved successfully"
