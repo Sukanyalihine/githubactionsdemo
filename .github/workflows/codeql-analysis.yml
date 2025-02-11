@@ -2,8 +2,8 @@ name: CodeQL Analysis
 
 on:
   workflow_call:
-   inputs:
-        directory:
+    inputs:
+      directory:
         description: 'The directory to analyze'
         required: false
         default: '.'
@@ -21,6 +21,7 @@ jobs:
 
       - name: Initialize CodeQL database
         run: |
+          echo "Directory to analyze: ${{ inputs.directory }}"
           codeql database init --language=python --source-root="${{ inputs.directory }}"
 
       - name: Perform CodeQL analysis
