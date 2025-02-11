@@ -1,0 +1,12 @@
+name: Run CodeQL Analysis
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  reuse-codeql:
+    uses: githubactionsdemo/.github/workflows/codeql-analysis.yml@main
+    with:
+      directory: 'src'
