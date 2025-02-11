@@ -1,0 +1,29 @@
+name: CodeQL Analysis
+on:
+  workflow_call:
+   inputs:
+        directory:
+        description: 'The directory to analyze'
+        required: false
+        default: '.'
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up CodeQL
+        uses: github/codeql-action/setup-codeql@v2
+
+      - name: Initialize CodeQL database
+        run: |
+          codeql database init --language=python --source-root="${{ inputs.directory }}"
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v2
+
+      - name: Upload CodeQL results
+        uses: github/codeql-action/upload-results@v2
