@@ -1,4 +1,5 @@
 name: CodeQL Analysis
+
 on:
   workflow_call:
    inputs:
